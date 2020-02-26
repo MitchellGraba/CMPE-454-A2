@@ -24,15 +24,15 @@ in vec2 texCoords;     // fragment texture coordinates (if provided)
 out vec4 fragColour;   // fragment's final colour
 
 
-uniform vec3 Ia;
-uniform vec3 ks;
-uniform vec3 kd;
-uniform float shininess;
+uniform vec3 Ia;  //ambient light intensity
+uniform vec3 ks;  //specular reflection coefficent
+uniform vec3 kd;  //diffuse reflection coefficent
+uniform float shininess; // shine
 
 void main()
 
 {
-  bool phong = true; //use phone else us diffuse only
+  bool phong = true; //use phone else use diffuse only
 
   vec3 Iin = vec3(1.0, 1.0, 1.0);
   // Calculate the position of this fragment in the light's CCS.
@@ -46,13 +46,11 @@ void main()
   // Determine the (x,y) coordinates of this fragment in the light's
   // CCS in the range [0,1]x[0,1].
 
-  vec2 shadowTexCoords = ccsLightPos.xy * 0.5 + 0.5; 
+  vec2 shadowTexCoords = ccsLightPos.xy / 2.0 + 0.5; 
 
   // Look up the depth from the light in the shadowBuffer texture.
 
   float shadowDepth = texture(shadowBuffer, shadowTexCoords).r; 
-
-  
 
 
   // Determine whether the fragment is in shadow.
@@ -66,26 +64,25 @@ if (phong) {
     vec3 lightColour = vec3(1.0);
     vec3 texColour = texture(objTexture, texCoords).rgb;
 
-    // Cheating ambient lighting
-    vec3 ambient = 0.15 * texColour;
+    
+    vec3 ambient = 0.17 * texColour; // ambient
 
     // Doing diffuse lighting
     float diff = max(dot(lightDir, norm), 0.0);
     vec3 diffuse = diff * lightColour;
 
     // Specular lighting
-    vec3 eyeDir = normalize(eyePosition - wcsPosition);
+    vec3 V = normalize(eyePosition - wcsPosition);
   
-    vec3 halfwayDir = normalize(lightDir + eyeDir);
+    vec3 halfwayDir = normalize(lightDir + V);
     float spec = pow(max(dot(norm, halfwayDir), 0.0), 64.0);
     vec3 specular = spec * lightColour;
   
-    // Lighting Total
+    // Putting it all together 
     float bias = max(0.05 * (1.0 - dot(normal, lightDir)), 0.005);
-    float shadow = fragDepth - bias > shadowDepth ? 1.0 : 0.0;
-    vec3 lighting = vec3(1.0, 1.0, 1.0);
+    float shadow = (fragDepth - bias) > shadowDepth ? 1.0 : 0.0;
+    vec3 lighting;
 
-  // Compute Illumination via Phong
   // Choose the colour either from the object's texture (if
   // 'texturing' == 1) or from the input colour.
     if (texturing){
@@ -99,7 +96,7 @@ if (phong) {
     fragColour = vec4(lighting, 1.0f);  
 
   }  else {
-
+    //just diffuse lighting
     mediump float NdotL = dot( normalize(normal), lightDir );
 
     if (NdotL < 0.0)

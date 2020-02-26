@@ -24,5 +24,5 @@ void main()
 
   // Output the ccsLightDepth in the range [0,1]
 
-  ccsLightDepth = (ccsLightPos.z/ccsLightPos.w + 1.0)/2.0; // CHANGE THIS
+  ccsLightDepth = ((ccsLightPos.z/ccsLightPos.w) + 1.0) / 2.0; // CHANGE THIS
 }
