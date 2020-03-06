@@ -34,7 +34,7 @@ void main()
 {
   bool phong = true; //use phone else use diffuse only
 
-  vec3 Iin = vec3(1.0, 1.0, 1.0);
+  vec3 Iin; 
   // Calculate the position of this fragment in the light's CCS.
 
   vec4 ccsLightPos = WCS_to_lightCCS * vec4(wcsPosition, 1.0); 
@@ -53,10 +53,8 @@ void main()
   float shadowDepth = texture(shadowBuffer, shadowTexCoords).r; 
 
 
-  // Determine whether the fragment is in shadow.
-  //
-  // If results look bad, add a bit to the shadow texture depth to
-  // prevent z-fighting.
+  // Determine whether the fragment is in a shadow
+  
  
   
 if (phong) {
@@ -67,20 +65,20 @@ if (phong) {
     
     vec3 ambient = 0.17 * texColour; // ambient
 
-    // Doing diffuse lighting
-    float diff = max(dot(lightDir, norm), 0.0);
-    vec3 diffuse = diff * lightColour;
+    //  diffuse lighting
+    mediump float dif = max(dot(lightDir, norm), 0.0);
+    vec3 diffuse = dif * lightColour;
 
-    // Specular lighting
+    // Spec lighting
     vec3 V = normalize(eyePosition - wcsPosition);
   
-    vec3 halfwayDir = normalize(lightDir + V);
-    float spec = pow(max(dot(norm, halfwayDir), 0.0), 64.0);
+    vec3 halfway = normalize(lightDir + V);
+   mediump float spec = pow(max(dot(norm, halfway), 0.0), 64.0);
     vec3 specular = spec * lightColour;
   
     // Putting it all together 
-    float bias = max(0.05 * (1.0 - dot(normal, lightDir)), 0.005);
-    float shadow = (fragDepth - bias) > shadowDepth ? 1.0 : 0.0;
+   mediump float bias = max(0.05 * (1.0 - dot(normal, lightDir)), 0.005);
+   mediump float shadow = (fragDepth - bias) > shadowDepth ? 1.0 : 0.0;
     vec3 lighting;
 
   // Choose the colour either from the object's texture (if
@@ -92,7 +90,7 @@ if (phong) {
     }
 
     // Output the fragment colour, modified by the illumination model
-    // and shadowing.
+    // and shadowing
     fragColour = vec4(lighting, 1.0f);  
 
   }  else {
